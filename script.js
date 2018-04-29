@@ -14,48 +14,51 @@ function validateForm(options) {
 
   var form = document.getElementById(formId);
 
-  var name = form.elements.name;
-  var age = form.elements.age;
-  // var phone = form.elements.phone;
-  // var number = form.elements.number;
-
+  /**
+   * Обработчик отправки формы
+   */
   form.addEventListener("submit", function(ev) {
     ev.preventDefault();
-    var inputs = Array.from(form.elements);
-    inputs.forEach(function(input) {
-      validateFields(input, formValidClass, formInvalidClass, inputErrorClass);
+    var inputs = Array.from(form.elements).filter(function(input) {
+      return !!input.dataset.validator;
     });
+
+    var errors = [];
+
+    inputs.forEach(function(input) {
+      if (!validateField(input)) errors.push(input);
+    });
+
+    var successValidate = errors.some(function(item) {
+      return !!item;
+    });
+    console.log(errors, successValidate);
+    toggleClassFormValidate(
+      form,
+      successValidate,
+      formValidClass,
+      formInvalidClass,
+    );
   });
 
   /**
    * Функция валидации полей
    * @param field валидируемый элемент
-   * @param validClassName класс успешной валидации
-   * @param invalidClassName класс не успешной валидации
-   * @param errorClassName класс ошибочного заполнения
+   * @returns {boolean}
    */
-  function validateFields(
-    field,
-    validClassName,
-    invalidClassName,
-    errorClassName,
-  ) {
+
+  function validateField(field) {
     var validType = field.dataset.validator;
     var value = field.value;
-    var error = false;
     switch (validType) {
       case "letters":
-        lettersValidate(value);
-        break;
+        return lettersValidate(value);
       case "number":
-        numberValidate(value);
-        break;
+        return numberValidate(value);
       case "regexp":
-        regexpValidate(value);
-        break;
+        return regexpValidate(value);
     }
-
-    toggleClassFormValidate(form, false, validClassName, invalidClassName);
+    return false;
   }
 
   /**
@@ -64,27 +67,27 @@ function validateForm(options) {
    * @returns {boolean}
    */
   function lettersValidate(value) {
-    console.log("lettersValidate");
-    return !!value;
+    console.log("lettersValidate", value.length > 0);
+    return value.length > 0;
   }
 
   function numberValidate(value) {
-    console.log("numberValidate");
-    return !!value;
+    console.log("numberValidate", value.length > 0);
+    return value.length > 0;
   }
 
   function regexpValidate(value) {
-    console.log("regexpValidate");
-    return !!value;
+    console.log("regexpValidate", value.length > 0);
+    return value.length > 0;
   }
 
-    /**
-     * Устанавливает класс в зависимости от успешности валидации полей
-     * @param form элемент формы
-     * @param valid валидность формы
-     * @param validClass класс успешной валидации
-     * @param invalidClass класс ошибки валидации
-     */
+  /**
+   * Устанавливает класс в зависимости от успешности валидации полей
+   * @param form элемент формы
+   * @param valid валидность формы
+   * @param validClass класс успешной валидации
+   * @param invalidClass класс ошибки валидации
+   */
   function toggleClassFormValidate(form, valid, validClass, invalidClass) {
     if (valid) {
       form.classList.remove(invalidClass);
@@ -93,5 +96,13 @@ function validateForm(options) {
       form.classList.remove(validClass);
       form.classList.add(invalidClass);
     }
+  }
+
+  function setClassInputError(field, className) {
+    field.classList.add(className);
+  }
+
+  function removeClassInputError(field, className) {
+    field.classList.remove(className);
   }
 }
