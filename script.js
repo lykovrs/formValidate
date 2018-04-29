@@ -23,7 +23,7 @@ function validateForm(options) {
     ev.preventDefault();
     var inputs = Array.from(form.elements);
     inputs.forEach(function(input) {
-      validateField(input, formValidClass, formInvalidClass, inputErrorClass);
+      validateFields(input, formValidClass, formInvalidClass, inputErrorClass);
     });
   });
 
@@ -34,7 +34,7 @@ function validateForm(options) {
    * @param invalidClassName класс не успешной валидации
    * @param errorClassName класс ошибочного заполнения
    */
-  function validateField(
+  function validateFields(
     field,
     validClassName,
     invalidClassName,
@@ -42,23 +42,20 @@ function validateForm(options) {
   ) {
     var validType = field.dataset.validator;
     var value = field.value;
+    var error = false;
     switch (validType) {
       case "letters":
-        //TODO: вынести эту логику в отедльную функцию
-        if (lettersValidate(value)) {
-          field.classList.add(validClassName);
-        } else {
-          field.classList.add(invalidClassName);
-        }
-        console.log("letters", value, lettersValidate(value));
+        lettersValidate(value);
         break;
       case "number":
-        console.log("numbers");
+        numberValidate(value);
         break;
       case "regexp":
-        console.log("regexp");
+        regexpValidate(value);
         break;
     }
+
+    toggleClassFormValidate(form, false, validClassName, invalidClassName);
   }
 
   /**
@@ -67,14 +64,34 @@ function validateForm(options) {
    * @returns {boolean}
    */
   function lettersValidate(value) {
+    console.log("lettersValidate");
     return !!value;
   }
 
   function numberValidate(value) {
+    console.log("numberValidate");
     return !!value;
   }
 
   function regexpValidate(value) {
+    console.log("regexpValidate");
     return !!value;
+  }
+
+    /**
+     * Устанавливает класс в зависимости от успешности валидации полей
+     * @param form элемент формы
+     * @param valid валидность формы
+     * @param validClass класс успешной валидации
+     * @param invalidClass класс ошибки валидации
+     */
+  function toggleClassFormValidate(form, valid, validClass, invalidClass) {
+    if (valid) {
+      form.classList.remove(invalidClass);
+      form.classList.add(validClass);
+    } else {
+      form.classList.remove(validClass);
+      form.classList.add(invalidClass);
+    }
   }
 }
