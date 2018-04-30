@@ -1,5 +1,4 @@
 "use strict";
-
 // Код валидации формы
 
 /**
@@ -17,7 +16,7 @@ function validateForm(options) {
    * Обработчик отправки формы
    */
   form.addEventListener("submit", function(ev) {
-    // отменяем действие по умолчанию
+    // отменяем действие по-умолчанию
     ev.preventDefault();
     // выбираем только поля с валидацией
     var inputs = Array.from(form.elements).filter(function(input) {
@@ -58,7 +57,9 @@ function validateForm(options) {
       case "letters":
         return lettersValidate(value);
       case "number":
-        return numberValidate(value);
+        var min = field.dataset.validatorMin;
+        var max = field.dataset.validatorMax;
+        return numberValidate(value, min, max);
       case "regexp":
         return regexpValidate(value);
     }
@@ -66,24 +67,42 @@ function validateForm(options) {
   }
 
   /**
-   * Класс текстовой валидации
-   * @param value
+   * Текстовая валидация, только кириллица и латинские буквы
+   * @param value валидируемая строка
    * @returns {boolean}
    */
   function lettersValidate(value) {
-    var lengthError = value.length > 0;
-    var lettersError = /^[a-zа-яё\s]+$/iu.test(value);
-    return lengthError && lettersError;
+    var lengthValidate = value.length > 0;
+    var lettersValidate = /^[a-zа-яё\s]+$/iu.test(value);
+    return lengthValidate && lettersValidate;
   }
 
-  function numberValidate(value) {
-    console.log("numberValidate", value.length > 0);
-    return value.length > 0;
+  /**
+   * Валидация числовых полей
+   * @param value валидируемое строковое значение
+   * @param min минимально допустимое занчение(опционально)
+   * @param max максилмально допустимое занчение(опционально)
+   * @returns {boolean}
+   */
+  function numberValidate(value, min, max) {
+    var lengthValidate = value.length > 0;
+    var isNumber = !isNaN(value);
+    // результат проверок на число и длину
+    var result = lengthValidate && isNumber;
+
+    // учет минимального значения
+    if (min) result = result && +value >= +min;
+
+    // учет максимального значения
+    if (max) result = result && +value <= +max;
+
+    return result;
   }
 
   function regexpValidate(value) {
-    console.log("regexpValidate", value.length > 0);
-    return value.length > 0;
+    var lengthValidate = value.length > 0;
+    // console.log("regexpValidate", value.length > 0);
+    return lengthValidate;
   }
 
   /**
