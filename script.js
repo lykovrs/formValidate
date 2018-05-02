@@ -12,16 +12,47 @@ function validateForm(options) {
   var inputErrorClass = options.inputErrorClass;
   var form = document.getElementById(formId);
 
+  // выбираем только поля с валидацией
+  var inputs = Array.from(form.elements).filter(function(input) {
+    return !!input.dataset.validator;
+  });
+
+  /**
+   * Обработка фокуса
+   */
+  form.addEventListener(
+    "focus",
+    function(ev) {
+      var control = ev.target;
+      // обрабатываем только контролы с валидацией
+      if (control.dataset.validator) {
+        removeClassInputError(control, inputErrorClass);
+      }
+    },
+    true,
+  );
+
+  /**
+   * Обработка потери фокуса
+   */
+  form.addEventListener(
+    "blur",
+    function(ev) {
+      var control = ev.target;
+      // обрабатываем только контролы с валидацией
+      if (control.dataset.validator && !validateField(control)) {
+        setClassInputError(control, inputErrorClass);
+      }
+    },
+    true,
+  );
+
   /**
    * Обработчик отправки формы
    */
   form.addEventListener("submit", function(ev) {
     // отменяем действие по-умолчанию
     ev.preventDefault();
-    // выбираем только поля с валидацией
-    var inputs = Array.from(form.elements).filter(function(input) {
-      return !!input.dataset.validator;
-    });
     // массив с не валидными полями
     var errors = [];
 
