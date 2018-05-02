@@ -83,17 +83,18 @@ function validateForm(options) {
    */
   function validateField(field) {
     var validType = field.dataset.validator;
+    var required = "required" in field.dataset;
     var value = field.value;
     switch (validType) {
       case "letters":
-        return lettersValidate(value);
+        return lettersValidate(value, required);
       case "number":
         var min = field.dataset.validatorMin;
         var max = field.dataset.validatorMax;
-        return numberValidate(value, min, max);
+        return numberValidate(value, min, max, required);
       case "regexp":
         var pattern = field.dataset.validatorPattern;
-        return regexpValidate(value, pattern);
+        return regexpValidate(value, pattern, required);
     }
     return false;
   }
@@ -101,12 +102,13 @@ function validateForm(options) {
   /**
    * Текстовая валидация, только кириллица и латинские буквы
    * @param value валидируемая строка
+   * @param required обязательность заполнения
    * @returns {boolean}
    */
-  function lettersValidate(value) {
+  function lettersValidate(value, required) {
     var lengthValidate = value.length > 0;
     var lettersValidate = /^[a-zа-яё\s]+$/iu.test(value);
-    return lengthValidate && lettersValidate;
+    return required ? lengthValidate && lettersValidate : lettersValidate;
   }
 
   /**
@@ -114,13 +116,14 @@ function validateForm(options) {
    * @param value валидируемое строковое значение
    * @param min минимально допустимое занчение(опционально)
    * @param max максилмально допустимое занчение(опционально)
+   * @param required обязательность заполнения
    * @returns {boolean}
    */
-  function numberValidate(value, min, max) {
+  function numberValidate(value, min, max, required) {
     var lengthValidate = value.length > 0;
-    var isNumber = !isNaN(value);
+    var isNumber = isFinite(value);
     // результат проверок на число и длину
-    var result = lengthValidate && isNumber;
+    var result = required ? lengthValidate && isNumber : isNumber;
 
     // учет минимального значения
     if (min) result = result && +value >= +min;
@@ -135,12 +138,18 @@ function validateForm(options) {
    * Валидация при помощи паттерна регулярного выражения
    * @param value валидируемое строковое значение
    * @param pattern паттерн регулярного выражения
+   * @param required обязательность заполнения
    * @returns {boolean}
    */
-  function regexpValidate(value, pattern) {
+  function regexpValidate(value, pattern, required) {
     var lengthValidate = value.length > 0;
     var regExpValidate = new RegExp(pattern, "iu").test(value);
-    return lengthValidate && regExpValidate;
+    if (required) {
+      return lengthValidate && regExpValidate;
+    }
+    if (value) return regExpValidate;
+
+    return true;
   }
 
   /**
