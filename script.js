@@ -61,7 +61,8 @@ function validateForm(options) {
         var max = field.dataset.validatorMax;
         return numberValidate(value, min, max);
       case "regexp":
-        return regexpValidate(value);
+        var pattern = field.dataset.validatorPattern;
+        return regexpValidate(value, pattern);
     }
     return false;
   }
@@ -99,10 +100,16 @@ function validateForm(options) {
     return result;
   }
 
-  function regexpValidate(value) {
+  /**
+   * Валидация при помощи паттерна регулярного выражения
+   * @param value валидируемое строковое значение
+   * @param pattern паттерн регулярного выражения
+   * @returns {boolean}
+   */
+  function regexpValidate(value, pattern) {
     var lengthValidate = value.length > 0;
-    // console.log("regexpValidate", value.length > 0);
-    return lengthValidate;
+    var regExpValidate = new RegExp(pattern, "iu").test(value);
+    return lengthValidate && regExpValidate;
   }
 
   /**
